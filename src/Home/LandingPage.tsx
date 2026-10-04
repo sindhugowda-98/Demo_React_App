@@ -1,12 +1,31 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Brand from "../Components/Brand";
+import ProductList from "./ProductList";
+import FormulationSection from "./FormulationSection";
+import { getProducts } from "../Services/ProductService";
+import { Product } from "../Services/ProductService";
 
 interface LandingPageProps {
   onLogin: () => void;
+  onProducts: (productId?: string) => void;
 }
 
-function LandingPage({ onLogin }: LandingPageProps) {
+function LandingPage({ onLogin, onProducts }: LandingPageProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const products = useMemo(() => getProducts(), []);
+  const openProduct = (product: Product) => onProducts(product.id);
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 768 && menuOpen) {
+        setMenuOpen(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [menuOpen]);
   return (
     <main id="home" className="site-shell">
       <div className="announcement">
@@ -19,7 +38,7 @@ function LandingPage({ onLogin }: LandingPageProps) {
           className={`main-nav ${menuOpen ? "nav-open" : ""}`}
           aria-label="Main navigation"
         >
-          <a href="#products" onClick={() => setMenuOpen(false)}>
+          <a href="/products" onClick={(event) => { event.preventDefault(); setMenuOpen(false); onProducts(); }}>
             Products
           </a>
           <a href="#about" onClick={() => setMenuOpen(false)}>
@@ -140,71 +159,29 @@ function LandingPage({ onLogin }: LandingPageProps) {
           <span className="index-rule" /> A DIFFERENT KIND OF BLEND
         </div>
       </section>
-      <section id="products" className="products-section">
+      <section id="products" className="products-section home-products-section">
         <div className="section-heading">
           <div>
             <span className="eyebrow">
-              <span className="eyebrow-line" /> WHAT WE DO
+              <span className="eyebrow-line" /> OUR DAIRY PRODUCTS
             </span>
             <h2>
-              Good science.
+              Dairy favourites.
               <br />
-              <em>Better by nature.</em>
+              <em>Made for every day.</em>
             </h2>
           </div>
           <p>
-            Solutions designed around the things that matter: people, planet,
-            and progress.
+            From evaporated milk to ice cream, explore our range of carefully
+            blended dairy products.
           </p>
         </div>
-        <div className="product-grid">
-          <article className="product-card">
-            <div className="product-top">
-              <span className="product-number">01</span>
-              <span className="product-symbol symbol-green">✳</span>
-            </div>
-            <h3>Bio-based solutions</h3>
-            <p>
-              Harnessing nature’s building blocks to create smarter, more
-              responsible alternatives.
-            </p>
-            <a href="#contact" className="card-link">
-              Explore solutions <span>↗</span>
-            </a>
-            <div className="card-orb orb-green" />
-          </article>
-          <article className="product-card">
-            <div className="product-top">
-              <span className="product-number">02</span>
-              <span className="product-symbol symbol-blue">◉</span>
-            </div>
-            <h3>Research &amp; development</h3>
-            <p>
-              From a promising idea to a proven application, we turn research
-              into progress.
-            </p>
-            <a href="#contact" className="card-link">
-              How we work <span>↗</span>
-            </a>
-            <div className="card-orb orb-blue" />
-          </article>
-          <article className="product-card">
-            <div className="product-top">
-              <span className="product-number">03</span>
-              <span className="product-symbol symbol-orange">⌁</span>
-            </div>
-            <h3>Custom formulations</h3>
-            <p>
-              Purpose-built blends tailored to your needs, backed by thoughtful
-              science.
-            </p>
-            <a href="#contact" className="card-link">
-              Start a conversation <span>↗</span>
-            </a>
-            <div className="card-orb orb-orange" />
-          </article>
-        </div>
+        <ProductList products={products} onSelect={openProduct} />
+        <button className="home-products-link" type="button" onClick={() => onProducts()}>
+          Explore the full product range <span aria-hidden="true">↗</span>
+        </button>
       </section>
+      <FormulationSection />
       <section id="about" className="about-section">
         <div className="about-art">
           <div className="about-leaf">✳</div>
